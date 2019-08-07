@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Bootstrap-ecommerce by Vosidiy">
+
+    <title>BACKEND TEST UI </title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
+
+    <!-- jQuery -->
+    <script src="js/jquery-2.0.0.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap4 files-->
+    <script src="js/bootstrap.bundle.min.js" type="text/javascript"></script>
+    <link href="css/bootstrap.css" rel="stylesheet" type="text/css" />
+
+    <!-- Font awesome 5 -->
+    <link href="fonts/fontawesome/css/fontawesome-all.min.css" type="text/css" rel="stylesheet">
+ 
+    <!-- custom style -->
+    <link href="css/ui.css" rel="stylesheet" type="text/css" />
+    <link href="css/responsive.css" rel="stylesheet" media="only screen and (max-width: 1200px)" />
+
+    <!-- custom javascript -->
+    <script src="js/script.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+    <header class="section-header">
+
+        <section class="header-main shadow-sm">
+            <div class="container">
+                <div class="row-sm align-items-center">
+                    <div class="col-lg-12-24 col-sm-12">
+                        <div class="widgets-wrap float-left row no-gutters py-1">
+                            <a href="index.html"><h4 id="box-shop" style="text-transform: uppercase"></h4><a/>
+                        </div>
+                    </div>
+                    <div class="col-lg-12-24 col-sm-12">
+                        <div class="widgets-wrap float-right row no-gutters py-1">
+                            <div class="col-auto">
+                                    <a href="order-merchant.html" class="widget-header">
+                                        <div class="icontext">
+                                            <div class="icon-wrap"><i class="text-warning icon-sm fa fa-shopping-cart"></i></div>
+                                            <div class="text-wrap text-dark">
+                                                My
+                                                <br> Orders
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            <div class="col-auto">
+                                <a href="#" id="btn-logout" class="widget-header">
+                                    <div class="icontext">
+                                        <div class="icon-wrap"><i class="text-warning icon-sm fas fa-sign-out-alt"></i></div>
+                                        <div class="text-wrap text-dark">
+                                            <span id="box-name"></span>
+                                            <br> Sign Out
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- widgets-wrap.// row.// -->
+                    </div>
+                    <!-- col.// -->
+                </div>
+                <!-- row.// -->
+            </div>
+            <!-- container.// -->
+        </section>
+        <!-- header-main .// -->
+    </header>
+    <!-- section-header.// -->
+
+    <!-- ========================= SECTION CONTENT ========================= -->
+    <section class="section-content bg padding-y-sm">
+        <div class="container">
+            <div class="col-md-12 col-12 col-sm-12">
+                <div class="card">
+                    <article class="card-body">
+                        <h4 class="card-title mb-4 mt-1">ORDER / TRANSACTION</h4>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <th>#</th>
+                                <th>Customer Name</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </thead>
+                            <tbody id="table-order">
+                            </tbody>
+                        </table>
+                    </article>
+                </div>
+                <!-- card.// -->
+            </div>
+        </div>
+        <!-- container // -->
+    </section>
+    <!-- ========================= SECTION CONTENT .END// ========================= -->
+</body>
+</html>
+<script>
+if(!localStorage.getItem("userId")) {
+    location.href = "auth-merchant.html";
+}
+$(document).ready(function() {
+    $("#box-shop").html(localStorage.getItem("userShop"));
+    $("#box-name").html(localStorage.getItem("userName"));
+    $("#btn-logout").click(function() {
+        localStorage.clear();
+        location.href = "auth-merchant.html"
+    })
+    let token = localStorage.getItem("userToken");
+    let userId = localStorage.getItem("userId");
+    $.ajax({
+        method : "GET",
+        url : localStorage.getItem("apiHost") + "merchant/order/merchant/" + userId,
+        headers : {
+            token : token
+        },
+        success : function(data) {
+            if(data.status == true) {
+                var html = "";
+                var number = 0;
+                for(var i in data.data) {
+                    number = number + 1;
+                    html += '<tr>'+
+                                '<td>'+number+'</td>'+
+                                '<td>'+data.data[i].customer[0].name+'</td>'+
+                                '<td>'+data.data[i].product.name+'</td>'+
+                                '<td>'+data.data[i].qty+'</td>'+
+                                '<td>IDR '+data.data[i].price+'</td>'+
+                                '<td>IDR '+data.data[i].total+'</td>'+
+                            '</tr>'
+                }
+                $("#table-order").html(html);
+            }
+        },
+        error : function(error) {
+            let obj = error.responseJSON;
+            alert(obj.message);
+        }
+    })
+})
+
+</script>

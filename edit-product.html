@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Bootstrap-ecommerce by Vosidiy">
+
+    <title>BACKEND TEST UI </title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
+
+    <!-- jQuery -->
+    <script src="js/jquery-2.0.0.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap4 files-->
+    <script src="js/bootstrap.bundle.min.js" type="text/javascript"></script>
+    <link href="css/bootstrap.css" rel="stylesheet" type="text/css" />
+
+    <!-- Font awesome 5 -->
+    <link href="fonts/fontawesome/css/fontawesome-all.min.css" type="text/css" rel="stylesheet">
+ 
+    <!-- custom style -->
+    <link href="css/ui.css" rel="stylesheet" type="text/css" />
+    <link href="css/responsive.css" rel="stylesheet" media="only screen and (max-width: 1200px)" />
+
+    <!-- custom javascript -->
+    <script src="js/script.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+    <!-- ========================= SECTION CONTENT ========================= -->
+    <section class="section-content bg padding-y-sm">
+        <div class="container">
+            <div class="col-md-12 col-12 col-sm-12">
+                <div class="card">
+                    <article class="card-body">
+                        <h4 class="card-title mb-4 mt-1">
+                            <a href="index.html" class="btn btn-outline-primary"><i class="fas fa-arrow-left"></i> BACK</a>
+                            <button class="btn btn-danger float-right" id="btn-delete"><i class="fas fa-trash"></i> DELETE PRODUCT</button>
+                        </h4>
+                        <form id="form">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input name="name" class="form-control" placeholder="Product Name" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" name="description" id="" cols="30" rows="10"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Price</label>
+                                <input name="price" class="form-control" placeholder="Product Price" type="number" required>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block"> SUBMIT </button>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+                <!-- card.// -->
+            </div>
+        </div>
+    </section>
+    <!-- ========================= SECTION CONTENT .END// ========================= -->
+</body>
+</html>
+<script>
+$(document).ready(function() {
+    let productId = localStorage.getItem("editProductId");
+    let merchantId = localStorage.getItem("userId");
+    let token = localStorage.getItem("userToken");
+    $.ajax({
+        method : "GET",
+        url : localStorage.getItem("apiHost") + "merchant/product/" + productId,
+        headers : {
+            token : token
+        },
+        success : function(data) {
+            if(data.status == true) {
+                $("[name=name]").val(data.data.name);
+                $("[name=description]").val(data.data.description);
+                $("[name=price]").val(data.data.price);
+            }
+        },
+        error : function(error) {
+            let obj = error.responseJSON;
+            alert(obj.message);
+        }
+    })
+    $("#form").submit(function(event) {
+        event.preventDefault();
+        let body = {
+            merchantId : merchantId,
+        };
+        var arr = $(this).serializeArray();
+        arr.forEach(function(item, index) {
+            if (body[item.name] === undefined) { // New
+                body[item.name] = item.value || '';
+            } else {                            // Existing
+                if (!body[item.name].push) {
+                    body[item.name] = [body[item.name]];
+                }
+                body[item.name].push(item.value || '');
+            }
+        });
+        $.ajax({
+            method : "PUT",
+            url : localStorage.getItem("apiHost") + "merchant/product/" + productId,
+            headers : {
+                token : token
+            },
+            data : body,
+            success : function(data) {
+                if(data.status == true) {
+                    location.href = "index.html";
+                }
+            },
+            error : function(error) {
+                let obj = error.responseJSON;
+                alert(obj.message);
+            }
+        })
+    })
+    $("#btn-delete").click(function() {
+        var r = confirm("Are you sure want delete this product?");
+        if (r == true) {
+            $.ajax({
+                method : "DELETE",
+                url : localStorage.getItem("apiHost") + "merchant/product/" +productId + "?merchantId=" + merchantId,
+                headers : {
+                    token : token
+                },
+                success : function(data) {
+                    if(data.status == true) {
+                        location.href = "index.html";
+                    }
+                },
+                error : function(error) {
+                    let obj = error.responseJSON;
+                    alert(obj.message);
+                }
+            })
+        } 
+    })
+})
+</script>
